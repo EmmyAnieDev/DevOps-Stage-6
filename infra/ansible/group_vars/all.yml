@@ -1,0 +1,12 @@
+---
+# GitHub Configuration
+github_username: "EmmyAnieDev"  # Update with your GitHub username
+github_repo: "DevOps-Stage-6"
+github_branch: "main"
+
+# Application Configuration
+app_dir: /opt/hng-todo-app
+jwt_secret: "myfancysecret"
+
+# Domain
+domain: "hngtech.name.ng"

@@ -1,0 +1,65 @@
+---
+- name: Check if repository exists
+  stat:
+    path: "{{ app_dir }}/.git"
+  register: repo_exists
+
+- name: Clone application repository
+  git:
+    repo: "https://github.com/{{ github_username }}/{{ github_repo }}.git"
+    dest: "{{ app_dir }}"
+    version: "{{ github_branch }}"
+    force: yes
+  when: not repo_exists.stat.exists
+  register: git_clone
+
+- name: Pull latest changes
+  git:
+    repo: "https://github.com/{{ github_username }}/{{ github_repo }}.git"
+    dest: "{{ app_dir }}"
+    version: "{{ github_branch }}"
+    force: yes
+  when: repo_exists.stat.exists
+  register: git_pull
+
+- name: Check if docker-compose.yml changed
+  set_fact:
+    compose_changed: "{{ git_clone.changed or git_pull.changed }}"
+
+- name: Stop existing containers if configuration changed
+  command: docker-compose down
+  args:
+    chdir: "{{ app_dir }}"
+  when: compose_changed
+  ignore_errors: yes
+
+- name: Build and start Docker containers
+  command: docker-compose up -d --build
+  args:
+    chdir: "{{ app_dir }}"
+  environment:
+    JWT_SECRET: "{{ jwt_secret | default('myfancysecret') }}"
+  when: compose_changed
+
+- name: Restart containers if no changes (ensure running)
+  command: docker-compose up -d
+  args:
+    chdir: "{{ app_dir }}"
+  environment:
+    JWT_SECRET: "{{ jwt_secret | default('myfancysecret') }}"
+  when: not compose_changed
+
+- name: Wait for services to be healthy
+  wait_for:
+    port: "{{ item }}"
+    host: localhost
+    delay: 10
+    timeout: 120
+  loop:
+    - 80
+    - 443
+  ignore_errors: yes
+
+- name: Display deployment status
+  debug:
+    msg: "Application deployed successfully at https://hngtech.name.ng"

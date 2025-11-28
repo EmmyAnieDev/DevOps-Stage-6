@@ -1,0 +1,71 @@
+# Terraform
+infra/terraform/.terraform/
+infra/terraform/.terraform.lock.hcl
+infra/terraform/terraform.tfstate
+infra/terraform/terraform.tfstate.backup
+infra/terraform/*.tfvars
+infra/terraform/tfplan
+infra/terraform/.terraform.tfstate.lock.info
+
+# Ansible
+infra/ansible/inventory.ini
+infra/ansible/*.retry
+
+# Environment
+.env.local
+.env.production
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Java
+target/
+*.class
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+env/
+venv/
+
+# Docker
+docker-compose.override.yml
+
+# SSH Keys
+*.pem
+*.key
+id_rsa*
+
+# Certificates
+*.crt
+*.key
+acme.json
+
+.venv
+.venv/
+
+terraform_1.6.0_linux_amd64.zip
