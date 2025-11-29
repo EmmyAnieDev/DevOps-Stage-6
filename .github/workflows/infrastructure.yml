@@ -41,6 +41,26 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: Setup SSH Keys
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
+          chmod 600 ~/.ssh/id_rsa
+          chmod 644 ~/.ssh/id_rsa.pub
+
+      - name: Create terraform.tfvars
+        working-directory: infra/terraform
+        run: |
+          cat > terraform.tfvars <<EOF
+          aws_region = "us-east-1"
+          instance_type = "t3.medium"
+          instance_name = "hng-todo-app"
+          ssh_public_key_path = "$HOME/.ssh/id_rsa.pub"
+          ssh_private_key_path = "$HOME/.ssh/id_rsa"
+          domain = "hngtech.name.ng"
+          EOF
+
       - name: Terraform Init
         working-directory: infra/terraform
         run: terraform init
@@ -120,6 +140,26 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: Setup SSH Keys
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
+          chmod 600 ~/.ssh/id_rsa
+          chmod 644 ~/.ssh/id_rsa.pub
+
+      - name: Create terraform.tfvars
+        working-directory: infra/terraform
+        run: |
+          cat > terraform.tfvars <<EOF
+          aws_region = "us-east-1"
+          instance_type = "t3.medium"
+          instance_name = "hng-todo-app"
+          ssh_public_key_path = "$HOME/.ssh/id_rsa.pub"
+          ssh_private_key_path = "$HOME/.ssh/id_rsa"
+          domain = "hngtech.name.ng"
+          EOF
+
       - name: Download Terraform Plan
         uses: actions/download-artifact@v4
         with:
@@ -177,6 +217,26 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
+
+      - name: Setup SSH Keys
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
+          chmod 600 ~/.ssh/id_rsa
+          chmod 644 ~/.ssh/id_rsa.pub
+
+      - name: Create terraform.tfvars
+        working-directory: infra/terraform
+        run: |
+          cat > terraform.tfvars <<EOF
+          aws_region = "us-east-1"
+          instance_type = "t3.medium"
+          instance_name = "hng-todo-app"
+          ssh_public_key_path = "$HOME/.ssh/id_rsa.pub"
+          ssh_private_key_path = "$HOME/.ssh/id_rsa"
+          domain = "hngtech.name.ng"
+          EOF
 
       - name: Terraform Init
         working-directory: infra/terraform
