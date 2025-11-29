@@ -82,7 +82,8 @@ resource "aws_instance" "app_server" {
   }
 
   tags = {
-    Name = var.instance_name
+    Name        = var.instance_name
+    Environment = "production"
   }
 
   lifecycle {
