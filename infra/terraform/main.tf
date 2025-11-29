@@ -140,7 +140,10 @@ resource "null_resource" "run_ansible" {
   }
 
   provisioner "local-exec" {
-    command     = "ansible-playbook -i ${path.module}/../ansible/inventory.ini ${path.module}/../ansible/playbook.yml"
+    command     = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ${path.module}/../ansible/inventory.ini ${path.module}/../ansible/playbook.yml"
     working_dir = path.module
+    environment = {
+      ANSIBLE_CONFIG = "${path.module}/../ansible/ansible.cfg"
+    }
   }
 }
