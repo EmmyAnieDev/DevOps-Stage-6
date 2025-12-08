@@ -61,7 +61,8 @@ resource "aws_security_group" "app_sg" {
   }
 
   tags = {
-    Name = "${var.instance_name}-sg"
+    Name      = "${var.instance_name}-sg"
+    ManagedBy = "terraform"
   }
 
   lifecycle {
@@ -77,13 +78,14 @@ resource "aws_instance" "app_server" {
   vpc_security_group_ids = [aws_security_group.app_sg.id]
 
   root_block_device {
-    volume_size = 20
-    volume_type = "gp2"
+    volume_size = 30
+    volume_type = "gp3"
   }
 
   tags = {
     Name        = var.instance_name
     Environment = "production"
+    ManagedBy   = "terraform"
   }
 
   lifecycle {
@@ -137,7 +139,7 @@ resource "null_resource" "run_ansible" {
   depends_on = [local_file.ansible_inventory, null_resource.wait_for_instance]
 
   triggers = {
-    always_run = timestamp()
+    instance_id = aws_instance.app_server.id
   }
 
   provisioner "local-exec" {
