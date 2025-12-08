@@ -80,8 +80,21 @@ jobs:
 
       - name: Verify Deployment
         run: |
+          echo "Waiting for application to be ready..."
           sleep 30
-          curl -f https://hngtech.name.ng || exit 1
+
+          echo "Checking API endpoint..."
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://hngtech.name.ng/todos)
+
+          echo "API returned status: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "401" ]; then
+            echo "✅ Deployment verified! API is responding correctly"
+            exit 0
+          else
+            echo "❌ Deployment verification failed. Expected 200 or 401, got $HTTP_CODE"
+            exit 1
+          fi
 
       - name: Send Deployment Notification
         if: success()

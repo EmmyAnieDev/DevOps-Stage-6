@@ -88,6 +88,21 @@
     - 443
   ignore_errors: yes
 
+- name: Wait for application to be ready
+  pause:
+    seconds: 20
+
+- name: Verify API is responding
+  uri:
+    url: "https://{{ domain }}/todos"
+    method: GET
+    status_code: [200, 401]
+    validate_certs: no
+  register: api_check
+  retries: 5
+  delay: 10
+  until: api_check.status in [200, 401]
+
 - name: Display deployment status
   debug:
-    msg: "Application deployed successfully at https://hngtech.name.ng"
+    msg: "✅ Application deployed successfully! API is responding at https://{{ domain }}/todos (Status: {{ api_check.status }})"
