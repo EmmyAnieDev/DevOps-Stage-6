@@ -70,12 +70,11 @@ jobs:
         id: plan
         working-directory: infra/terraform
         run: |
-          set +e
-          terraform plan -detailed-exitcode -out=tfplan 2>&1 | tee /tmp/tfplan.log
-          TF_EXIT=${PIPESTATUS[0]}
-          set -e
-          echo "exitcode=$TF_EXIT" >> $GITHUB_OUTPUT
-          exit 0
+          terraform plan -detailed-exitcode -out=tfplan || echo "exitcode=$?" >> $GITHUB_OUTPUT
+          if [ ! -s $GITHUB_OUTPUT ]; then
+            echo "exitcode=0" >> $GITHUB_OUTPUT
+          fi
+          terraform show tfplan
 
       - name: Check for Drift
         id: drift

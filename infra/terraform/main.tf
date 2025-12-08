@@ -63,6 +63,7 @@ resource "aws_security_group" "app_sg" {
   tags = {
     Name      = "${var.instance_name}-sg"
     ManagedBy = "terraform"
+    Project   = "HNG-DevOps"
   }
 
   lifecycle {
@@ -86,6 +87,8 @@ resource "aws_instance" "app_server" {
     Name        = var.instance_name
     Environment = "production"
     ManagedBy   = "terraform"
+    Project     = "HNG-DevOps"
+    Owner       = "DevOps-Team"
   }
 
   lifecycle {
