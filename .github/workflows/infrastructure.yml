@@ -72,7 +72,7 @@ jobs:
         run: |
           set +e
           terraform plan -detailed-exitcode -out=tfplan 2>&1 | tee /tmp/tfplan.log
-          TF_EXIT=$?
+          TF_EXIT=${PIPESTATUS[0]}
           set -e
           echo "exitcode=$TF_EXIT" >> $GITHUB_OUTPUT
           exit 0
