@@ -33,3 +33,10 @@ variable "ssh_private_key_path" {
   type        = string
   default     = "~/.ssh/id_rsa"
 }
+
+variable "notification_email" {
+  description = "Email address for drift detection and infrastructure change notifications"
+  type        = string
+  sensitive   = true
+}
+
