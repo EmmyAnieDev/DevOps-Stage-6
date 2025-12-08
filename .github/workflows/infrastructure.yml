@@ -1,5 +1,6 @@
 name: Infrastructure Deployment
 
+# This workflow handles Terraform deployment with drift detection
 on:
   push:
     branches:
