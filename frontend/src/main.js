@@ -15,6 +15,8 @@ import store from './store'
 
 Vue.config.productionTip = false
 
+console.log('🚀 HNG TODO App - Frontend Starting...')
+
 /* Auth plugin */
 import Auth from './auth'
 Vue.use(Auth)
