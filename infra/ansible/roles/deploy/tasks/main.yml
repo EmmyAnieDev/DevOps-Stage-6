@@ -22,32 +22,43 @@
   when: repo_exists.stat.exists
   register: git_pull
 
+- name: Create .env file
+  copy:
+    dest: "{{ app_dir }}/.env"
+    content: |
+      JWT_SECRET={{ jwt_secret }}
+      NODE_ENV=production
+    mode: '0600'
+
 - name: Check if docker-compose.yml changed
   set_fact:
     compose_changed: "{{ git_clone.changed or git_pull.changed }}"
 
-- name: Stop existing containers if configuration changed
+- name: Stop existing containers
   command: docker-compose down
   args:
     chdir: "{{ app_dir }}"
-  when: compose_changed
   ignore_errors: yes
 
 - name: Build and start Docker containers
-  command: docker-compose up -d --build
+  command: docker-compose up -d --build --force-recreate
   args:
     chdir: "{{ app_dir }}"
-  environment:
-    JWT_SECRET: "{{ jwt_secret | default('myfancysecret') }}"
-  when: compose_changed
+  register: compose_up
 
-- name: Restart containers if no changes (ensure running)
-  command: docker-compose up -d
+- name: Show Docker Compose output
+  debug:
+    var: compose_up.stdout_lines
+
+- name: Check running containers
+  command: docker-compose ps
   args:
     chdir: "{{ app_dir }}"
-  environment:
-    JWT_SECRET: "{{ jwt_secret | default('myfancysecret') }}"
-  when: not compose_changed
+  register: compose_ps
+
+- name: Display running containers
+  debug:
+    var: compose_ps.stdout_lines
 
 - name: Wait for services to be healthy
   wait_for:
