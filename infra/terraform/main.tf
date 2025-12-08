@@ -63,7 +63,7 @@ resource "aws_security_group" "app_sg" {
   tags = {
     Name      = "${var.instance_name}-sg"
     ManagedBy = "terraform"
-    Project   = "HNG-DevOps"
+    Project   = "HNG-DevOps-6"
   }
 
   lifecycle {
@@ -93,7 +93,7 @@ resource "aws_instance" "app_server" {
 
   lifecycle {
     create_before_destroy = true
-    ignore_changes        = [ami]
+    ignore_changes        = [ami, root_block_device]
   }
 }
 
