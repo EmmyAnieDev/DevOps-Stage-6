@@ -63,7 +63,7 @@ resource "aws_security_group" "app_sg" {
   tags = {
     Name      = "${var.instance_name}-sg"
     ManagedBy = "terraform"
-    Project   = "HNG-DevOps-6"
+    Project   = "HNG-DevOps-Emmy"
   }
 
   lifecycle {
