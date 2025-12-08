@@ -70,19 +70,25 @@ jobs:
         id: plan
         working-directory: infra/terraform
         run: |
-          terraform plan -detailed-exitcode -out=tfplan || exit_code=$?
-          echo "exitcode=$exit_code" >> $GITHUB_OUTPUT
+          terraform plan -detailed-exitcode -out=tfplan > /tmp/tfplan.log 2>&1 || TF_EXIT=$?
+          TF_EXIT=${TF_EXIT:-0}
+          echo "exitcode=$TF_EXIT" >> $GITHUB_OUTPUT
+          cat /tmp/tfplan.log
           exit 0
 
       - name: Check for Drift
         id: drift
         run: |
-          if [ "${{ steps.plan.outputs.exitcode }}" == "2" ]; then
+          echo "Terraform exit code: ${{ steps.plan.outputs.exitcode }}"
+          if [ "${{ steps.plan.outputs.exitcode }}" = "2" ]; then
             echo "drift_detected=true" >> $GITHUB_OUTPUT
             echo "::warning::Infrastructure drift detected!"
-          else
+          elif [ "${{ steps.plan.outputs.exitcode }}" = "0" ]; then
             echo "drift_detected=false" >> $GITHUB_OUTPUT
             echo "No drift detected"
+          else
+            echo "drift_detected=false" >> $GITHUB_OUTPUT
+            echo "Terraform plan error or no changes"
           fi
 
       - name: Send Drift Detection Email
