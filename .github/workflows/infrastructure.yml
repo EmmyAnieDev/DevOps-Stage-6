@@ -70,10 +70,11 @@ jobs:
         id: plan
         working-directory: infra/terraform
         run: |
-          terraform plan -detailed-exitcode -out=tfplan > /tmp/tfplan.log 2>&1 || TF_EXIT=$?
-          TF_EXIT=${TF_EXIT:-0}
+          set +e
+          terraform plan -detailed-exitcode -out=tfplan 2>&1 | tee /tmp/tfplan.log
+          TF_EXIT=$?
+          set -e
           echo "exitcode=$TF_EXIT" >> $GITHUB_OUTPUT
-          cat /tmp/tfplan.log
           exit 0
 
       - name: Check for Drift
