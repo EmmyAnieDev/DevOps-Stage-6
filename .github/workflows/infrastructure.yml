@@ -23,7 +23,7 @@ jobs:
     name: Terraform Plan & Drift Detection
     runs-on: ubuntu-latest
     outputs:
-      tfplanExitCode: ${{ steps.plan.outputs.exitcode }}
+      drift_detected: ${{ steps.drift.outputs.drift_detected }}
 
     steps:
       - name: Checkout code
@@ -69,26 +69,33 @@ jobs:
       - name: Terraform Plan
         id: plan
         working-directory: infra/terraform
-        run: |
-          terraform plan -detailed-exitcode -out=tfplan || echo "exitcode=$?" >> $GITHUB_OUTPUT
-          if [ ! -s $GITHUB_OUTPUT ]; then
-            echo "exitcode=0" >> $GITHUB_OUTPUT
-          fi
-          terraform show tfplan
+        continue-on-error: true
+        run: terraform plan -detailed-exitcode -out=tfplan
+
+      - name: Capture Plan Exit Code
+        id: plan_exit
+        run: echo "exitcode=${{ steps.plan.outcome }}" >> $GITHUB_OUTPUT
 
       - name: Check for Drift
         id: drift
+        working-directory: infra/terraform
         run: |
-          echo "Terraform exit code: ${{ steps.plan.outputs.exitcode }}"
-          if [ "${{ steps.plan.outputs.exitcode }}" = "2" ]; then
+          # Run terraform plan again and capture changes
+          terraform show -json tfplan > plan.json
+
+          # Check if there are any resource changes
+          CHANGES=$(jq -r '[.resource_changes[]? | select(.change.actions != ["no-op"])] | length' plan.json)
+
+          echo "Number of resource changes: $CHANGES"
+
+          if [ "$CHANGES" -gt "0" ]; then
             echo "drift_detected=true" >> $GITHUB_OUTPUT
-            echo "::warning::Infrastructure drift detected!"
-          elif [ "${{ steps.plan.outputs.exitcode }}" = "0" ]; then
-            echo "drift_detected=false" >> $GITHUB_OUTPUT
-            echo "No drift detected"
+            echo "::warning::Infrastructure drift detected! $CHANGES resources will be modified."
+            exit 0
           else
             echo "drift_detected=false" >> $GITHUB_OUTPUT
-            echo "Terraform plan error or no changes"
+            echo "No drift detected"
+            exit 0
           fi
 
       - name: Send Drift Detection Email
@@ -143,7 +150,7 @@ jobs:
     name: Manual Approval & Terraform Apply
     runs-on: ubuntu-latest
     needs: terraform-plan
-    if: needs.terraform-plan.outputs.tfplanExitCode == '2'
+    if: needs.terraform-plan.outputs.drift_detected == 'true'
     environment:
       name: production
 
@@ -241,7 +248,7 @@ jobs:
     name: Auto Apply (No Drift)
     runs-on: ubuntu-latest
     needs: terraform-plan
-    if: needs.terraform-plan.outputs.tfplanExitCode != '2'
+    if: needs.terraform-plan.outputs.drift_detected != 'true'
 
     steps:
       - name: Checkout code
