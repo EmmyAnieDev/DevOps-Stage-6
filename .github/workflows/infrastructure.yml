@@ -249,7 +249,7 @@ jobs:
     name: Auto Apply (No Drift)
     runs-on: ubuntu-latest
     needs: terraform-plan
-    if: needs.terraform-plan.outputs.tfplanExitCode == '0'
+    if: needs.terraform-plan.outputs.drift_detected == 'false'
 
     steps:
       - name: Display Status
