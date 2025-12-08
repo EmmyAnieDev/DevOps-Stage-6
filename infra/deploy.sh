@@ -41,7 +41,7 @@ fi
 cd terraform
 
 # Initialize Terraform
-echo -e "${YELLOW}Initializing Terraform...${NC}"
+echo -e "${YELLOW}Initializing Terraform....${NC}"
 terraform init
 
 # Plan
