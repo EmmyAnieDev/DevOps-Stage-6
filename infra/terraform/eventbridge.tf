@@ -35,50 +35,7 @@ EOF
   }
 }
 
-# EventBridge rule for security group changes
-resource "aws_cloudwatch_event_rule" "security_group_changes" {
-  name        = "hng-devops-security-group-changes"
-  description = "Capture security group configuration changes"
 
-  event_pattern = jsonencode({
-    source      = ["aws.ec2"]
-    detail-type = ["AWS API Call via CloudTrail"]
-    detail = {
-      eventSource = ["ec2.amazonaws.com"]
-      eventName = [
-        "AuthorizeSecurityGroupIngress",
-        "AuthorizeSecurityGroupEgress",
-        "RevokeSecurityGroupIngress",
-        "RevokeSecurityGroupEgress",
-        "ModifySecurityGroupRules"
-      ]
-    }
-  })
-
-  tags = {
-    Name        = "HNG DevOps Security Group Changes"
-    Environment = "production"
-  }
-}
-
-resource "aws_cloudwatch_event_target" "sg_changes_sns" {
-  rule      = aws_cloudwatch_event_rule.security_group_changes.name
-  target_id = "SendSGChangesToSNS"
-  arn       = aws_sns_topic.drift_detection.arn
-
-  input_transformer {
-    input_paths = {
-      event     = "$.detail.eventName"
-      user      = "$.detail.userIdentity.principalId"
-      time      = "$.time"
-      region    = "$.detail.awsRegion"
-      sgid      = "$.detail.requestParameters.groupId"
-    }
-    input_template = <<EOF
-"Security Group Change Detected\n\nEvent: <event>\nSecurity Group ID: <sgid>\nModified By: <user>\nTime: <time>\nRegion: <region>\n\nPlease verify this change matches your Terraform configuration."
-EOF
-  }
-}
 
 # EventBridge rule for scheduled drift detection (every 6 hours)
 resource "aws_cloudwatch_event_rule" "scheduled_drift_check" {
