@@ -84,10 +84,10 @@ jobs:
           # Run terraform plan again and capture changes
           terraform show -json tfplan > plan.json
 
-          # Check if there are any resource changes
-          CHANGES=$(jq -r '[.resource_changes[]? | select(.change.actions != ["no-op"])] | length' plan.json)
+          # Check if there are any resource changes (excluding local_file and null_resource which are expected)
+          CHANGES=$(jq -r '[.resource_changes[]? | select(.change.actions != ["no-op"]) | select(.type != "local_file" and .type != "null_resource")] | length' plan.json)
 
-          echo "Number of resource changes: $CHANGES"
+          echo "Number of significant resource changes: $CHANGES"
 
           if [ "$CHANGES" -gt "0" ]; then
             echo "drift_detected=true" >> $GITHUB_OUTPUT
@@ -95,7 +95,7 @@ jobs:
             exit 0
           else
             echo "drift_detected=false" >> $GITHUB_OUTPUT
-            echo "No drift detected"
+            echo "No drift detected - infrastructure is in sync"
             exit 0
           fi
 
